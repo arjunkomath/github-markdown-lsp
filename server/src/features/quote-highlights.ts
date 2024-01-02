@@ -1,5 +1,6 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
+  CompletionItem,
   CompletionItemKind,
   Diagnostic,
   DiagnosticSeverity,
@@ -57,12 +58,21 @@ export const validateQuoteHighlights = (
   return diagnostics;
 };
 
-export const highlightsCompletionItems = () => {
+export const highlightsCompletionTriggers = ["["];
+
+export const highlightsOnCompletion = (
+  linePrefix: string
+): CompletionItem[] => {
+  // Check if the line matches the desired prefix (e.g., '> [')
+  if (!linePrefix.endsWith("> [")) return [];
+
+  // Map valid highlights to completion items
   return validHighlights.map((highlight, i) => {
     return {
       label: highlight,
       kind: CompletionItemKind.Keyword,
-      data: i,
+      data: `highlight-${i}`,
+      insertText: `!${highlight}`,
     };
   });
 };

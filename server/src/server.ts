@@ -6,7 +6,6 @@ import {
   InitializeParams,
   DidChangeConfigurationNotification,
   CompletionItem,
-  CompletionItemKind,
   TextDocumentPositionParams,
   TextDocumentSyncKind,
   InitializeResult,
@@ -15,7 +14,8 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   highlightItemDetails,
-  validHighlights,
+  highlightsCompletionTriggers,
+  highlightsOnCompletion,
   validateQuoteHighlights,
 } from "./features/quote-highlights";
 
@@ -53,7 +53,7 @@ connection.onInitialize((params: InitializeParams) => {
       // Tell the client that this server supports code completion.
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ["["],
+        triggerCharacters: [...highlightsCompletionTriggers],
       },
     },
   };
@@ -169,18 +169,9 @@ connection.onCompletion(
       end: textDocumentPosition.position,
     });
 
-    // Check if the line matches the desired prefix (e.g., '> [')
-    if (!linePrefix.endsWith("> [")) return [];
+    const completions = [...highlightsOnCompletion(linePrefix)];
 
-    // Map valid highlights to completion items
-    return validHighlights.map((highlight, i) => {
-      return {
-        label: highlight,
-        kind: CompletionItemKind.Keyword,
-        data: `highlight-${i}`,
-        insertText: `!${highlight}`,
-      };
-    });
+    return completions;
   }
 );
 
