@@ -3,6 +3,8 @@
 > [!WARNING]
 > This is a work in progress. It is not ready for use.
 
+<img src="https://github.com/arjunkomath/github-markdown-lsp/blob/main/docs/demo.jpeg?raw=true" alt="demo"/>
+
 ## Structure
 
 ```
