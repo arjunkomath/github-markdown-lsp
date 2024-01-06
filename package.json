@@ -22,13 +22,13 @@
       "type": "object",
       "title": "Default configuration",
       "properties": {
-        "ghMarkdownLsp.maxNumberOfProblems": {
+        "githubMarkdownLSP.suppressWarnings": {
           "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
+          "type": "boolean",
+          "default": false,
+          "description": "Controls whether to suppress warnings from the language server."
         },
-        "ghMarkdownLsp.trace.server": {
+        "githubMarkdownLSP.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [

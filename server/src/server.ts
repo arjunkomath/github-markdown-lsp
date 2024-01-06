@@ -18,6 +18,8 @@ import {
   highlightsOnCompletion,
   validateQuoteHighlights,
 } from "./features/quote-highlights";
+import { validateNewlines } from "./features/unnecessary-newlines";
+import { LspSettings, defaultSettings } from "./settings";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -82,15 +84,9 @@ connection.onInitialized(() => {
   }
 });
 
-// Settings
-interface LspSettings {
-  maxNumberOfProblems: number;
-}
-
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
-const defaultSettings: LspSettings = { maxNumberOfProblems: 1000 };
 let globalSettings: LspSettings = defaultSettings;
 
 // Cache the settings of all open documents
@@ -102,7 +98,7 @@ connection.onDidChangeConfiguration((change) => {
     documentSettings.clear();
   } else {
     globalSettings = <LspSettings>(
-      (change.settings.ghMarkdownLsp || defaultSettings)
+      (change.settings.githubMarkdownLSP || defaultSettings)
     );
   }
 
@@ -118,7 +114,7 @@ function getDocumentSettings(resource: string): Thenable<LspSettings> {
   if (!result) {
     result = connection.workspace.getConfiguration({
       scopeUri: resource,
-      section: "ghMarkdownLsp",
+      section: "githubMarkdownLSP",
     });
     documentSettings.set(resource, result);
   }
@@ -138,7 +134,6 @@ documents.onDidChangeContent((change) => {
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   const settings = await getDocumentSettings(textDocument.uri);
-  // TODO: Implement settings validation here
 
   const diagnostics: Diagnostic[] = [
     ...validateQuoteHighlights(
@@ -147,7 +142,10 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     ),
   ];
 
-  // Send the computed diagnostics to VSCode.
+  if (!settings.suppressWarnings) {
+    diagnostics.push(...validateNewlines(textDocument));
+  }
+
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
