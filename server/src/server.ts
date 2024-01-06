@@ -20,6 +20,11 @@ import {
 } from "./features/quote-highlights";
 import { validateNewlines } from "./features/unnecessary-newlines";
 import { LspSettings, defaultSettings } from "./settings";
+import {
+  collapsedSectionCompletionTrigger,
+  sectionItemDetails,
+  sectionOnCompletion,
+} from "./features/collapsed-sections";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -55,7 +60,10 @@ connection.onInitialize((params: InitializeParams) => {
       // Tell the client that this server supports code completion.
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: [...highlightsCompletionTriggers],
+        triggerCharacters: [
+          ...highlightsCompletionTriggers,
+          ...collapsedSectionCompletionTrigger,
+        ],
       },
     },
   };
@@ -167,7 +175,10 @@ connection.onCompletion(
       end: textDocumentPosition.position,
     });
 
-    const completions = [...highlightsOnCompletion(linePrefix)];
+    const completions = [
+      ...highlightsOnCompletion(linePrefix),
+      ...sectionOnCompletion(linePrefix),
+    ];
 
     return completions;
   }
@@ -177,6 +188,11 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
   if (item.data.startsWith("highlight-")) {
     const id = parseInt(item.data.replace("highlight-", ""));
     const { detail, documentation } = highlightItemDetails(id);
+    item.detail = detail;
+    item.documentation = documentation;
+  } else if (item.data.startsWith("section-tag-")) {
+    const id = parseInt(item.data.replace("section-tag-", ""));
+    const { detail, documentation } = sectionItemDetails(id);
     item.detail = detail;
     item.documentation = documentation;
   }

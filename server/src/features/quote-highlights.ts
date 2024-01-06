@@ -63,10 +63,8 @@ export const highlightsCompletionTriggers = ["["];
 export const highlightsOnCompletion = (
   linePrefix: string
 ): CompletionItem[] => {
-  // Check if the line matches the desired prefix (e.g., '> [')
   if (!linePrefix.endsWith("> [")) return [];
 
-  // Map valid highlights to completion items
   return validHighlights.map((highlight, i) => {
     return {
       label: highlight,
