@@ -17,6 +17,25 @@
         └── server.ts // Language Server entry point
 ```
 
+## Setup with Neovim using lspconfig
+
+```lua
+local lspconfig = require 'lspconfig'
+local configs = require 'lspconfig.configs'
+
+if not configs.ghmdlsp then
+  configs.ghmdlsp = {
+    default_config = {
+      cmd = { "node", "/path-to-your-repo-location/md-lsp/server/out/server.js", "--stdio" },
+      root_dir = lspconfig.util.root_pattern('.git'),
+      filetypes = { "markdown" },
+    },
+  }
+end
+
+lspconfig.ghmdlsp.setup {}
+```
+
 ## Running locally
 
 - Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder

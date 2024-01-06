@@ -150,7 +150,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
     ),
   ];
 
-  if (!settings.suppressWarnings) {
+  if (settings) {
+    const { suppressWarnings } = settings;
+
+    if (!suppressWarnings) {
+      diagnostics.push(...validateNewlines(textDocument));
+    }
+  } else {
     diagnostics.push(...validateNewlines(textDocument));
   }
 

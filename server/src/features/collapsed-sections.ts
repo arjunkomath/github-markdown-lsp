@@ -5,7 +5,7 @@ const validTags = ["details", "summary"];
 export const collapsedSectionCompletionTrigger = ["<", "/"];
 
 export const sectionOnCompletion = (linePrefix: string): CompletionItem[] => {
-  if (linePrefix !== "<" && linePrefix !== "</") {
+  if (linePrefix.trim() !== "<" && linePrefix.trim() !== "</") {
     return [];
   }
 
