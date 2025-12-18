@@ -21,7 +21,7 @@ export const validateQuoteHighlights = (
   const diagnostics: Diagnostic[] = [];
 
   const text = textDocument.getText();
-  const pattern = />\s\[!(.*)\]/g;
+  const pattern = />\s\[!([^\]]*)\]/g;
   let m: RegExpExecArray | null;
 
   while ((m = pattern.exec(text))) {
@@ -63,59 +63,54 @@ export const highlightsCompletionTriggers = ["["];
 export const highlightsOnCompletion = (
   linePrefix: string
 ): CompletionItem[] => {
-  if (!linePrefix.endsWith("> [")) return [];
+  if (!/^>\s+\[$/.test(linePrefix)) return [];
 
-  return validHighlights.map((highlight, i) => {
+  return validHighlights.map((highlight) => {
     return {
       label: highlight,
       kind: CompletionItemKind.Keyword,
-      data: `highlight-${i}`,
+      data: `highlight-${highlight}`,
       insertText: `!${highlight}`,
     };
   });
 };
 
+const highlightDetails: Record<string, { detail: string; documentation: string }> = {
+  NOTE: {
+    detail: "Inserts a Note block",
+    documentation:
+      "Use this for adding a note or a side comment that is relevant but not part of the main text.",
+  },
+  TIP: {
+    detail: "Inserts a Tip block",
+    documentation:
+      "Use this to provide a tip or a suggestion that could be useful for the reader.",
+  },
+  IMPORTANT: {
+    detail: "Inserts an Important block",
+    documentation:
+      "Use this to highlight important information that the reader should not miss.",
+  },
+  WARNING: {
+    detail: "Inserts a Warning block",
+    documentation:
+      "Use this to warn the reader about potential pitfalls or important considerations.",
+  },
+  CAUTION: {
+    detail: "Inserts a Caution block",
+    documentation:
+      "Use this to advise extra care in specific situations that could lead to problems.",
+  },
+};
+
 export const highlightItemDetails = (
-  item: number
+  highlight: string
 ): {
   detail: string;
   documentation: string;
 } => {
-  switch (item) {
-    case 0: // NOTE
-      return {
-        detail: "Inserts a Note block",
-        documentation:
-          "Use this for adding a note or a side comment that is relevant but not part of the main text.",
-      };
-    case 1: // TIP
-      return {
-        detail: "Inserts a Tip block",
-        documentation:
-          "Use this to provide a tip or a suggestion that could be useful for the reader.",
-      };
-    case 2: // IMPORTANT
-      return {
-        detail: "Inserts an Important block",
-        documentation:
-          "Use this to highlight important information that the reader should not miss.",
-      };
-    case 3: // WARNING
-      return {
-        detail: "Inserts a Warning block",
-        documentation:
-          "Use this to warn the reader about potential pitfalls or important considerations.",
-      };
-    case 4: // CAUTION
-      return {
-        detail: "Inserts a Caution block",
-        documentation:
-          "Use this to warn the reader about potential pitfalls or important considerations.",
-      };
-    default:
-      return {
-        detail: "Markdown Highlight",
-        documentation: "Inserts a special markdown highlight block.",
-      };
-  }
+  return highlightDetails[highlight] ?? {
+    detail: "Markdown Highlight",
+    documentation: "Inserts a special markdown highlight block.",
+  };
 };

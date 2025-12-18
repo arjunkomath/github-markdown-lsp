@@ -192,8 +192,8 @@ connection.onCompletion(
 
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
   if (item.data.startsWith("highlight-")) {
-    const id = parseInt(item.data.replace("highlight-", ""));
-    const { detail, documentation } = highlightItemDetails(id);
+    const highlight = item.data.replace("highlight-", "");
+    const { detail, documentation } = highlightItemDetails(highlight);
     item.detail = detail;
     item.documentation = documentation;
   } else if (item.data.startsWith("section-tag-")) {
